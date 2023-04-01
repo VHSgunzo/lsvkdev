@@ -1,0 +1,17 @@
+[package]
+name = "lsvkdev"
+version = "0.0.1"
+readme = "README.md"
+license-file = "LICENSE"
+repository = "https://github.com/VHSgunzo/lsvkdev"
+description = "Show Vulkan deviceName and driverName on Rust"
+
+[profile.release]
+lto = true
+panic = "abort"
+opt-level = "z"
+strip = "symbols"
+codegen-units = 1
+
+[dependencies]
+vulkano = "0.32.3"

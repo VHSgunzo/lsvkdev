@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches:
+    - action
+    tags:
+    - '*'
+
+jobs:
+  build_and_release:
+    name: lsvkdev
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          override: true
+          profile: minimal
+          toolchain: nightly
+          target: x86_64-unknown-linux-gnu
+
+      - name: Build
+        run: >
+          rustup component add rust-src --toolchain nightly;
+          cargo install cross;
+          cross build --release;
+          mv -fv target/x86_64-unknown-linux-gnu/release/lsvkdev .
+
+      - name: Build archlinux package
+        uses: countstarlight/arch-makepkg-action@master
+        with:
+          scripts: makepkg
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: lsvkdev*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
